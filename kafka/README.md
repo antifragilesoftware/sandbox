@@ -20,6 +20,9 @@ infrastructure.
 Run the Kafka cluster on Kubernetes
 -----------------------------------
 
+Kubernetes service
+##################
+
 Once your Kubernetes cluster is created, you may create
 the Kafka cluster.
 
@@ -50,6 +53,8 @@ you can now connect to each.
 Note: This relies on the [service](http://kubernetes.io/v1.1/docs/user-guide/services.html)
 specification.
 
+Kubernetes replication controller
+#################################
 
 Before you can run the containers, you must
 edit the `specs/kafka-cluster.yaml` file to
