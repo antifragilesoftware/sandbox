@@ -12,7 +12,7 @@ The first step is to setup an infrastructure according to
 your requirements. Currently, this guide documents:
 
 * Local deployment
-* AWS deployment
+* [AWS deployment](https://github.com/Lawouach/sandbox/tree/master/kafka/deployment/aws)
 
 This will setup the Kubernetes environment on the
 infrastructure.
