@@ -25,13 +25,6 @@ Run the Kafka cluster on Kubernetes
 Once your Kubernetes cluster is created, you may create
 the Kafka cluster.
 
-Ensure the kubernetes cli uses the right backend:
-
-```
-$ export KUBERNETES_PROVIDER=aws
-```
-
-
 The first step is to create the service that will
 allow you to connect from the outside world to
 the Kafka cluster running in your infrastructure.
