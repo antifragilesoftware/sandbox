@@ -103,3 +103,15 @@ $ `pwd`/kubernetes/cluster/kube-up.sh
 Wait for 15 minutes before the cluster is ready. At that point,
 you should have one master node and a number of minion nodes
 available on AWS.
+
+Destroy the cluster
+-------------------
+
+Run the following command:
+```
+$ `pwd`/kubernetes/cluster/kube-down.sh
+```
+
+WARNING: This will destroy all the EC2 instances that were
+created during the cluster creation.
+
