@@ -47,6 +47,9 @@ On AWS, this will create a EC2 Load Balancer with two listeners
 for port `2181` (zookeeper) and `9092` (kafka) so that
 you can now connect to each.
 
+Note: This relies on the [service](http://kubernetes.io/v1.1/docs/user-guide/services.html)
+specification.
+
 
 Before you can run the containers, you must
 edit the `specs/kafka-cluster.yaml` file to
@@ -64,6 +67,10 @@ that will pilot the kakfa and zookeeper containers:
 $ kubectl.sh create -f specs/kafka-cluster.yaml
 replicationcontroller "kafka-controller" created
 ```
+
+Note: This relies on the [replication controller](http://kubernetes.io/v1.1/docs/user-guide/replication-controller.html)
+specification.
+
 
 Monitor the status of the replication controller:
 
@@ -131,3 +138,5 @@ job definition:
 $ kubectl.sh delete jobs create-topic
 ```
 
+Note: This relies on the new [job](http://kubernetes.io/v1.1/docs/user-guide/jobs.html)
+specification.
