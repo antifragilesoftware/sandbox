@@ -105,3 +105,29 @@ address used for the service. On AWS, this is the domain
 of the Load Balancer.
 
 
+Initialize the Kafka cluster
+----------------------------
+
+Few Kafka clients support setting a topic. It is
+possible to do so via a simple one-off job running
+on the kubernetes client:
+
+```
+$ kubectl.sh create -f specs/create-topic-job.yaml
+```
+
+You may see how the job is doing by running this command:
+
+```
+$ kubectl.sh describe jobs
+```
+
+Once the job has completed, the topic specified
+in the specs/create-topic-job.yaml file should be reachable
+in Kafka by any client. You may want to delete the
+job definition:
+
+```
+$ kubectl.sh delete jobs create-topic
+```
+
