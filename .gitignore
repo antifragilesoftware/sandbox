@@ -1,0 +1,3 @@
+*.pyc
+microservices/html
+microservices/__pycache__
