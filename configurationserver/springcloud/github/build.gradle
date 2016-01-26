@@ -13,7 +13,7 @@ apply plugin: 'spring-boot'
 apply plugin: "io.spring.dependency-management"
 
 jar {
-    baseName = 'antifragilesoftware-configurationserver-springcloud-redis'
+    baseName = 'antifragilesoftware-configurationserver-springcloud-github'
     version =  '0.0.1'
 }
 
