@@ -8,7 +8,7 @@ This is based on the micro service examples in the
 
 A simple Hello world service and Spring boot Application class using gradle, it is slightly elaborated to a a path that provides a simple json object. Then added an annotation to the service so it registered itself on the Eureka server.
 
-The Eureka server is using the SpringBoot [Eureka Server Sample](https://github.com/spring-cloud-samples/eureka) running on the default port. Once running the server can be accessed on http://localhost:8761 with registered leases visible at http://localhost:8761/lastn.
+The Eureka server is using the SpringBoot [Eureka Server Sample](https://github.com/spring-cloud-samples/eureka) running on the default port. Once running the server can be accessed on (http://localhost:8761) with registered leases visible at (http://localhost:8761/lastn).
 
 Now to register the service, all is required is to add @EnableDiscoveryClient to the RestController and include the dependencies.
 
@@ -25,7 +25,7 @@ spring:
 
 
 
-# HTTP Server
+### HTTP Server
 server:
   port: 4444   # HTTP (Jetty) port
 '''
@@ -35,9 +35,9 @@ The example can be run with
 ./gradlew bootRun
 
 After running you should be able to see the service running at
-1. http://localhost:4444
-1. http://localhost:4444/greeting
-1. http://localhost:4444/greeting&name=Freddy
+1. (http://localhost:4444)
+1. (http://localhost:4444/greeting)
+1. (http://localhost:4444/greeting&name=Freddy)
 
 Next up is the lookup service to follow shortly
 
