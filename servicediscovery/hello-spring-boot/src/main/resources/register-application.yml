@@ -1,0 +1,10 @@
+# Spring properties
+spring:
+  application:
+    name: Hello-Application  # Identify this application
+
+
+
+# HTTP Server
+server:
+  port: 4444   # HTTP (Jetty) port
