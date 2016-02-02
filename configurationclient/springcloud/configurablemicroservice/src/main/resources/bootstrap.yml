@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: configuredmicroservice1
+  profiles:
+    active: dev
+  cloud:
+    config:
+      uri: http://localhost:${config.port:8888}
+

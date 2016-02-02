@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.russmiles.antifragilesoftware</groupId>
-	<artifactId>configserver</artifactId>
+	<artifactId>configurablemicroservice</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>Configuration Server</name>
-	<description>Config Server project for the Antifragile Software book</description>
+	<name>Configurable Microservice</name>
+	<description>Demonstration Configurable Microservice for the Antifragile Software book</description>
 
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
@@ -20,14 +20,22 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-config-server</artifactId>
+			<artifactId>spring-cloud-starter-config</artifactId>
 		</dependency>
 	</dependencies>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<start-class>com.russmiles.antifragilesoftware.configurationserver.ConfigServerApplication</start-class>
+		<start-class>com.russmiles.antifragilesoftware.configurablemicroservice.ConfigurableMicroservice</start-class>
 		<java.version>1.8</java.version>
 		<docker.image.prefix>antifragilesoftware</docker.image.prefix>
 	</properties>
@@ -62,7 +70,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<!--skip deploy (this is just a test module) -->
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
 					<skip>true</skip>
