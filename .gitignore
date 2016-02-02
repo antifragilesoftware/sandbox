@@ -1,3 +1,9 @@
+target
+.DS_Store
+.gradle
+build
+*.iml
+.idea
 *.pyc
 microservices/html
 microservices/__pycache__
