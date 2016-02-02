@@ -4,4 +4,6 @@ target
 build
 *.iml
 .idea
-
+*.pyc
+microservices/html
+microservices/__pycache__
