@@ -1,0 +1,15 @@
+# Spring properties
+spring:
+  application:
+    name: Lookup-Application  # Identify this application
+ 
+
+# Discovery Server Access (used if not using default port for eureka)
+##eureka:
+##  client:
+##    serviceUrl:
+##      defaultZone: http://localhost:8761/eureka/
+
+# HTTP Server
+server:
+  port: 5555   # HTTP (Tomcat) port
