@@ -4,5 +4,11 @@ target
 build
 *.iml
 .idea
+<<<<<<< HEAD
 .vagrant
 ssl
+=======
+*.pyc
+microservices/html
+microservices/__pycache__
+>>>>>>> master
