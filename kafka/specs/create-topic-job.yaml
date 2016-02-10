@@ -17,5 +17,5 @@ spec:
       - name: create-topic
         image: ches/kafka
         command: ["kafka-topics.sh"]
-        args: ["--create --topic my-topic --replication-factor 1 --partitions 1 --zookeeper $(KAFKA_SERVICE_PORT_2181_TCP_ADDR):2181"]
+        args: ["--create --topic test1 --replication-factor 3 --partitions 2 --zookeeper zoo1:2181"]
       restartPolicy: Never
