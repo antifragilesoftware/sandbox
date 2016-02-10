@@ -11,10 +11,6 @@ spec:
     name: kafka-port
     targetPort: 9092
     protocol: TCP
-  - port: 2181
-    name: zookeeper-port
-    targetPort: 2181
-    protocol: TCP
   selector:
     app: kafka
   type: LoadBalancer

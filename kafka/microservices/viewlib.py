@@ -21,7 +21,7 @@ async def webserver(loop, view, addr, port):
     return srv
 
 
-async def consume_events(topic, addr, callback, delay=0.01):
+async def consume_events(topic, group, addr, callback, delay=0.01):
     """
     Connect to the Kafka endpoint and start consuming
     messages from the given `topic`.
@@ -55,6 +55,8 @@ def get_cli_parser():
     parser.add_argument('--topic', dest='topic', action='store',
                         help='kafka topic to consume from',
                         required=True)
+    parser.add_argument('--group', dest='group', action='store',
+                        help='kafka group to consume from')
     parser.add_argument('--broker', dest='broker', action='store',
                         help='kafka broker address', required=True)
     parser.add_argument('--addr', dest='addr', action='store',
@@ -71,7 +73,8 @@ def run_view(loop, args, view, event_handler):
     within the given main asyncio loop.
     """
     coroutines = [
-        consume_events(topic=args.topic.encode(),
+        consume_events(topic=args.topic.encode('utf-8'),
+                       group=args.group,
                        addr=args.broker,
                        callback=event_handler),
         webserver(loop, view, addr=args.addr, port=args.port)
