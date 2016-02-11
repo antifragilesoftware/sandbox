@@ -53,7 +53,7 @@ async def test_can_exit_from_consumer_loop(event_loop):
         # directly access the object that will be used
         # internally to the coroutine
         KafkaClient.return_value.topics['my-topic'].get_simple_consumer.return_value.consume.return_value = "hello world"
-        await viewlib.consume_events('my-topic', 'dummyaddr:9092', event_processor)
+        await viewlib.consume_events('my-topic', 'my-group', 'dummyaddr:9092', event_processor)
     
 
 @pytest.mark.asyncio
@@ -72,5 +72,5 @@ async def test_consumer_loop_will_wait_before_next_iteration(event_loop):
         # to our event handler to return False that will
         # exist the consumer
         KafkaClient.return_value.topics['my-topic'].get_simple_consumer.return_value.consume.side_effect = [None, "hello world"]
-        await viewlib.consume_events('my-topic', 'dummyaddr:9092', event_processor)
+        await viewlib.consume_events('my-topic', 'my-group', 'dummyaddr:9092', event_processor)
     
