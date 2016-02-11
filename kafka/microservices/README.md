@@ -8,6 +8,14 @@ Get started
 To run these services, you will first need to deploy a
 Kafka event store as explained [here](https://github.com/antifragilesoftware/sandbox/tree/master/kafka#run-a-kafka-cluster-on-kubernetes).
 
+You will also need to run a [consul](https://www.consul.io)
+agent locally so that your service is registered.
+Something like:
+
+```
+$ ./consul agent -server -bootstrap-expect=1 -data-dir=/tmp/consul -node=agent-one -bind=127.0.0.1
+```
+
 Once that is setup, you can run the services against it.
 
 Python requirements
