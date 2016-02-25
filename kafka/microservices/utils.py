@@ -7,13 +7,13 @@ from aiohttp import web
 __all__ = ["get_cli_parser", "webserver"]
 
 
-async def webserver(loop, view, addr, port):
+async def webserver(loop, view, addr, port, path='/', method='POST'):
     """
     Initialize the HTTP server and start responding
     to requests.
     """
     app = web.Application(loop=loop)
-    app.router.add_route('GET', '/', view)
+    app.router.add_route(method, path, view)
 
     srv = await loop.create_server(app.make_handler(),
                                    addr, port)

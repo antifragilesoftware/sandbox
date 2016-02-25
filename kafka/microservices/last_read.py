@@ -21,16 +21,20 @@ name, id and tags provided
 When the process is terminated, the service is deregistered
 automatically.
 """
+import asyncio
 import json
+import signal
 
 from aiohttp import web
 
-from discolib import service
-
+from discolib import register_service, deregister_service
+from eventlib import consume_events, stop_consuming_events
+from restlib import webserver, route_to_resource
+from utils import get_cli_parser
 
 # internal state
 bookshelf = []
-
+loop = asyncio.get_event_loop()
 
 async def bookshelf_view(request):
     """
@@ -49,39 +53,29 @@ async def event_handler(message):
     Simply store the event in a local state arena.
     """
     bookshelf.append(message.value.decode('utf-8'))
-
     
-if __name__ == '__main__':
-    import asyncio
-    import signal
     
-    from viewlib import get_cli_parser, view, exit_view
-    from discolib import service
-
-    # let's parse the service instance settings
+def run():
+    """
+    Entry point to this microservice.
+    """
     args = get_cli_parser().parse_args()
 
-    # everything will be dealt in this mainloop
-    loop = asyncio.get_event_loop()
+    # schedule the internal event consumer
+    # that will run until we terminate this service
+    asyncio.ensure_future(consume_events(topic=args.topic.encode('utf-8'),
+                                         group=args.group,
+                                         addr=args.broker,
+                                         callback=event_handler))
 
-    # hook onto the usual termination signal
-    # to deregister the service properly
-    loop.add_signal_handler(signal.SIGINT,
-                            asyncio.ensure_future,
-                            exit_view())
-    
-    # run the view as a service until we exit it
-    # the service will be advertised to the
-    # discovery service and deregister once
-    # we exit
-    loop.run_until_complete(
-        service(
-            view(
-                loop,
-                args,
-                view=bookshelf_view,
-                event_handler=event_handler
-            ),
+    # let's start the REST server that will
+    # serve the view's resource
+    srv = loop.run_until_complete(webserver(args.addr, args.port))
+    loop.run_until_complete(route_to_resource(bookshelf_view))
+
+    # finally, let's advertize this service
+    # to the rest of the world
+    svc = loop.run_until_complete(register_service(
             id=args.id,
             name=args.name,
             port=args.port,
@@ -89,4 +83,22 @@ if __name__ == '__main__':
             tags=args.tags
         )
     )
+    
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        loop.run_until_complete(deregister_service(svc))
+        loop.run_until_complete(stop_consuming_events())
         
+        srv.close()
+        loop.run_until_complete(srv.wait_closed())
+        # give the time for remaining requests to complete
+        loop.run_until_complete(asyncio.sleep(2))
+    
+    loop.close()
+
+    
+if __name__ == '__main__':  # pragma: no cover
+    run()

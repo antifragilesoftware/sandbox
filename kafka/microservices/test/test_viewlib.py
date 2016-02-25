@@ -1,76 +1,65 @@
 # -*- coding: utf-8 -*-
 import asyncio
+import time
 from unittest import mock
 
+import aiohttp
+import pykafka
 import pytest
 
-import viewlib
+import eventlib
 
-def test_parse_kafka_broker_address_is_mandatory():
-    parser = viewlib.get_cli_parser()
-    with pytest.raises(SystemExit) as excinfo:
-        parser.parse_args(['--topic', 'test'])
-
-        
-def test_parse_kafka_topic_is_mandatory():
-    parser = viewlib.get_cli_parser()
-    with pytest.raises(SystemExit) as excinfo:
-        parser.parse_args(['--broker', 'addr'])
+def source():
+    for i in range(10):
+        yield i
 
         
-def test_parse_default_service_listening_address_is_localhost():
-    parser = viewlib.get_cli_parser()
-    args = parser.parse_args(['--broker', 'addr', '--topic', 'test'])
-    assert args.addr == '127.0.0.1'
-
-    
-def test_parse_default_service_listening_port_is_localhost():
-    parser = viewlib.get_cli_parser()
-    args = parser.parse_args(['--broker', 'addr', '--topic', 'test'])
-    assert args.port == 8080
-
-    
 @pytest.mark.asyncio
-async def test_webserver_is_created(event_loop):
-    async def dummy_view(request):
-        await asyncio.sleep(1, loop=event_loop)
-    
-    srv = await viewlib.webserver(event_loop, dummy_view, '127.0.0.1', 8080)
-    assert isinstance(srv, asyncio.AbstractServer)
-
-    
-@pytest.mark.asyncio
-async def test_can_exit_from_consumer_loop(event_loop):
+async def test_consumer_will_exit_on_a_stop_iteration(event_loop):
     async def event_processor(message):
-        assert message == "hello world"
+        await asyncio.sleep(0.1)
+        print("bimm")
+
+    gen = iter(source())
+    with mock.patch('eventlib.KafkaClient', spec=pykafka.KafkaClient) as KafkaClient:
+        client = KafkaClient.return_value
+        client.topics = {'my-topic': mock.MagicMock(spec=pykafka.topic.Topic)}
+        consumer = client.topics['my-topic'].get_simple_consumer.return_value
+        consumer._running = True
+        consumer.consume.side_effect = gen
+        asyncio.ensure_future(eventlib.consume_events('my-topic', 'my-group', 'dummyaddr:9092',
+                                                      event_processor))
+        await asyncio.sleep(0.2)
+        print("ja")
+        await eventlib.stop_consuming_events('my-topic')
+
+    assert next(gen) == 1
+    assert eventlib.has_consumer('my-topic') == False
+    
+
         
-        # tell the consumer to exit
-        # TODO: might not be the cleanest chain of responsibility
-        return False
-
-    with mock.patch('viewlib.KafkaClient') as KafkaClient:
-        # that is an ugly line but it means we can
-        # directly access the object that will be used
-        # internally to the coroutine
-        KafkaClient.return_value.topics['my-topic'].get_simple_consumer.return_value.consume.return_value = "hello world"
-        await viewlib.consume_events('my-topic', 'my-group', 'dummyaddr:9092', event_processor)
-    
-
 @pytest.mark.asyncio
-async def test_consumer_loop_will_wait_before_next_iteration(event_loop):
-    # this test needs some loving as we need to
-    # check the coroutine does sleep indeed
-    
+async def test_consumer_will_wait_when_no_messages(event_loop):
+    processed_message = None
+    received_message_time = None
     async def event_processor(message):
-        assert message == "hello world"
-        return False
+        global processed_message
+        global received_message_time
+        
+        processed_message = message
+        received_message_time = time.time()
 
-    with mock.patch('viewlib.KafkaClient') as KafkaClient:
-        # the first call to the inner consume method
-        # will get None which will provoke the pause.
-        # The second call will get the message leading
-        # to our event handler to return False that will
-        # exist the consumer
-        KafkaClient.return_value.topics['my-topic'].get_simple_consumer.return_value.consume.side_effect = [None, "hello world"]
-        await viewlib.consume_events('my-topic', 'my-group', 'dummyaddr:9092', event_processor)
+    start = time.time()
+    with mock.patch('eventlib.KafkaClient') as KafkaClient:
+        # that first result will trigger the internal delay
+        # within the consumer
+        KafkaClient.return_value.topics['my-topic'].get_simple_consumer.return_value.consume.side_effect = [None, "second"]
+        asyncio.ensure_future(eventlib.consume_events('my-topic', 'my-group', 'dummyaddr:9092',
+                                                      event_processor, delay=1))
+        await asyncio.sleep(0.05)
+        await eventlib.stop_consuming_events('my-topic')
+        
+    await asyncio.sleep(0.5)
+    assert processed_message == "second"
+    assert 0.9 <= received_message_time - start <= 1.1
     

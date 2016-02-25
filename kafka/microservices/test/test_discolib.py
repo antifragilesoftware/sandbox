@@ -9,12 +9,7 @@ import discolib
 
 
 @pytest.mark.asyncio
-async def test_service_is_always_registered_and_unregistered():
-    async def hello():
-        return "bingo!"
-
-    coro = asyncio.coroutine(hello)
-    
+async def test_service_can_be_registered():
     with mock.patch('discolib.client') as client_func:
         client = asynctest.CoroutineMock()
         svc = mock.MagicMock()
@@ -22,38 +17,54 @@ async def test_service_is_always_registered_and_unregistered():
         client_func.return_value = client
         client.agent.services.register.return_value = svc
         
-        res = await discolib.service(coro(), id="svc1", name="svc",
-                               tags=["a", "b"],
-                               port=9000, address="localhost")
-        assert res == "bingo!"
-        
-        client.agent.services.register.assert_called_once_with("svc", id="svc1",
-                                                               tags=["a", "b"],
-                                                               port=9000,
-                                                               address="localhost")
-        client.agent.services.deregister.assert_called_once_with(svc)
+        res = await discolib.register_service(id="svc1", name="svc",
+                                              tags=["a", "b"],
+                                              port=9000,
+                                              address="localhost")
+        assert res == svc
 
         
 @pytest.mark.asyncio
-async def test_service_is_always_unregistered_even_after_exception():
-    async def hello():
-        raise ValueError()
-
-    coro = asyncio.coroutine(hello)
-    
+async def test_service_can_be_unregistered_by_id():
     with mock.patch('discolib.client') as client_func:
         client = asynctest.CoroutineMock()
         svc = mock.MagicMock()
         
         client_func.return_value = client
         client.agent.services.register.return_value = svc
+        
+        res = await discolib.register_service(id="svc1", name="svc",
+                                              tags=["a", "b"],
+                                              port=9000,
+                                              address="localhost")
+        assert res == svc
 
-        with pytest.raises(ValueError):
-            await discolib.service(coro(), id="svc1", name="svc",
-                               tags=["a", "b"],
-                               port=9000, address="localhost")
-        client.agent.services.deregister.assert_called_once_with(svc)
+        client.agent.services.deregister.return_value = True
+        res = await discolib.deregister_service("svc1")
+        client.agent.services.deregister.assert_called_with("svc1")
+        assert res is True
 
+        
+@pytest.mark.asyncio
+async def test_service_can_be_unregistered_by_instance():
+    with mock.patch('discolib.client') as client_func:
+        client = asynctest.CoroutineMock()
+        svc = mock.MagicMock()
+        
+        client_func.return_value = client
+        client.agent.services.register.return_value = svc
+        
+        res = await discolib.register_service(id="svc1", name="svc",
+                                              tags=["a", "b"],
+                                              port=9000,
+                                              address="localhost")
+        assert res == svc
+
+        client.agent.services.deregister.return_value = True
+        res = await discolib.deregister_service(svc)
+        client.agent.services.deregister.assert_called_with(svc)
+        assert res is True
+        
         
 @pytest.mark.asyncio
 async def test_service_discovery_can_be_empty():
