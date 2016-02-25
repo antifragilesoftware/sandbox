@@ -50,10 +50,8 @@ async def consume_events(topic, group, addr, callback, delay=0.01):
                 await callback(message)
             else:
                 await asyncio.sleep(delay)
-    except StopIteration:
-        pass
     except ConsumerStoppedException:
-        print("biil")
+        pass
     else:
         consumer.stop()
     finally:
@@ -72,7 +70,6 @@ async def stop_consuming_events(topic):
         consumer = consumers[topic]
         consumer.stop()
         while topic in consumers:
-            print(consumers)
             await asyncio.sleep(0.1)
 
 
