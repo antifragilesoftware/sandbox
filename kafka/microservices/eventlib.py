@@ -42,7 +42,6 @@ async def consume_events(topic, group, addr, callback, delay=0.01):
     try:
         while True:
             message = consumer.consume(block=False)
-            print(message)
             if message is not None:
                 await callback(message)
             else:
