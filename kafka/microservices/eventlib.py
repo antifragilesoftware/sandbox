@@ -2,10 +2,25 @@
 import asyncio
 
 from pykafka import KafkaClient
+from pykafka.exceptions import ConsumerStoppedException
 
-__all__ = ["consume_events"]
+__all__ = ["consume_events",
+           "stop_consuming_events"]
 
-consumer_running = False
+consumer_running = None
+kafka_client = None
+consumers = {}
+
+
+def client(hosts=None):
+    """
+    Internal function to create the client lazily
+    while caching it to avoid new connections.
+    """
+    global kafka_client
+    if not kafka_client:
+        kafka_client = KafkaClient(hosts=hosts)
+    return kafka_client
 
 
 async def consume_events(topic, group, addr, callback, delay=0.01):
@@ -19,23 +34,33 @@ async def consume_events(topic, group, addr, callback, delay=0.01):
     If `callback` returns `False`, this will exit
     the consumer immediately.
     """
-    global consumer_running
-    client = KafkaClient(hosts=addr)
-    topic = client.topics[topic]
-    consumer = topic.get_simple_consumer()
-    
-    consumer_running = True
-    while consumer_running:
-        message = consumer.consume(block=False)
-        if message is not None:
-            running = await callback(message)
-            if running is False:
-                break
-        else:
-            await asyncio.sleep(delay)
+    if topic in consumers:
+        raise RuntimeError("A consumer already exists for this topic")
 
-            
-def finish_consumer():
+    topic_name = topic
+    topic = client(addr).topics[topic]
+    consumer = topic.get_simple_consumer(consumer_group=group)
+    consumers[topic_name] = consumer
+
+    try:
+        while True:
+            message = consumer.consume(block=False)
+            print(message)
+            if message is not None:
+                await callback(message)
+            else:
+                await asyncio.sleep(delay)
+    except StopIteration:
+        pass
+    except ConsumerStoppedException:
+        print("biil")
+    else:
+        consumer.stop()
+    finally:
+        consumers.pop(topic_name, None)
+        
+        
+async def stop_consuming_events(topic):
     """
     Notify the consumer's flag that it is
     not running any longer.
@@ -43,5 +68,14 @@ def finish_consumer():
     The consumer will properly terminate at its
     next iteration.
     """
-    global consumer_running
-    consumer_running = False
+    if topic and topic in consumers:
+        consumer = consumers[topic]
+        consumer.stop()
+        while topic in consumers:
+            print(consumers)
+            await asyncio.sleep(0.1)
+
+
+def has_consumer(topic):
+    global consumers
+    return topic in consumers
