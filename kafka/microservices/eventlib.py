@@ -30,9 +30,6 @@ async def consume_events(topic, group, addr, callback, delay=0.01):
 
     The given callback is applied on each
     message.
-
-    If `callback` returns `False`, this will exit
-    the consumer immediately.
     """
     if topic in consumers:
         raise RuntimeError("A consumer already exists for this topic")
