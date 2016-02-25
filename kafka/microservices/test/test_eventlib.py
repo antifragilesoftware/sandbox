@@ -16,7 +16,6 @@ class FakeConsumer(mock.MagicMock):
         if not self._running:
             raise ConsumerStoppedException()
 
-        print(self.value)
         if type(self.value) == types.GeneratorType:
             return next(self.value)
             
