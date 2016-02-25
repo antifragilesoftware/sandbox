@@ -13,6 +13,11 @@ def source():
     for i in range(10):
         yield i
 
+class FakeConsumer(mock.MagicMock):
+    def consume(block=True):
+        if self._running:
+            return 0
+    
         
 @pytest.mark.asyncio
 async def test_consumer_will_exit_on_a_stop_iteration(event_loop):
@@ -24,9 +29,7 @@ async def test_consumer_will_exit_on_a_stop_iteration(event_loop):
     with mock.patch('eventlib.KafkaClient', spec=pykafka.KafkaClient) as KafkaClient:
         client = KafkaClient.return_value
         client.topics = {'my-topic': mock.MagicMock(spec=pykafka.topic.Topic)}
-        consumer = client.topics['my-topic'].get_simple_consumer.return_value
-        consumer._running = True
-        consumer.consume.side_effect = gen
+        client.topics['my-topic'].get_simple_consumer.return_value = FakeConsumer(_running=True)
         asyncio.ensure_future(eventlib.consume_events('my-topic', 'my-group', 'dummyaddr:9092',
                                                       event_processor))
         await asyncio.sleep(0.2)
