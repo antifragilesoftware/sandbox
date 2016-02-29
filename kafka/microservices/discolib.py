@@ -4,7 +4,8 @@ from functools import wraps, partial
 
 from aioconsul import Consul
 
-__all__ = ['service', 'discover_services', 'locate_service']
+__all__ = ['register_service', 'deregister_service',
+           'discover_services', 'locate_service']
 
 _client = None
 
@@ -20,25 +21,24 @@ def client():
     return _client
 
     
-async def service(coro, id, name, tags, port, address=None):
+async def register_service(id, name, tags, port, address=None):
     """
-    Service coroutine that will register before the
-    given coroutine is executed and unregister right after
-    it.
+    Register the service so that it can be advertized on the
+    network.
     """
-    svc = await client().agent.services.register(name, id=id,
-                                                 address=address,
-                                                 port=port,
-                                                 tags=tags)
-    try:
-        result = await asyncio.ensure_future(coro)
-    finally:
-        # we want to make sure the service is
-        # unregistered even when it failed
-        await client().agent.services.deregister(svc)
+    return await client().agent.services.register(name, id=id,
+                                                  address=address,
+                                                  port=port,
+                                                  tags=tags)
 
-    return result
 
+async def deregister_service(id):
+    """
+    Notifies the network this service is not available
+    any longer.
+    """
+    return await client().agent.services.deregister(id)
+    
 
 async def discover_services(tags):
     """
