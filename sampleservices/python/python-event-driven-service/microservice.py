@@ -73,7 +73,7 @@ def run():
     # connect to the broker and get our topic consumer ready
     client = KafkaClient(hosts=args.broker)
     topic = args.topic.encode('utf-8')
-    group = args.group.encode('utf-8')
+    group = args.group.encode('utf-8') if args.group else None
     consumer = client.topics[topic].get_simple_consumer(consumer_group=group)
 
     try:
