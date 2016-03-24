@@ -9,6 +9,11 @@ $ python microservice.py --topic my-topic
 
 The default broker's address is `localhost:9092`.
 This can changed through the `--broker` parameter.
+
+If you want to build it as a Docker container:
+
+$ docker build -t micro .
+$ docker run --rm micro --broker <ADVERTIZED_NAME>:9092 --topic my-topic
 """
 import argparse
 import time
